@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.String?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane prefHeight="600.0" prefWidth="900" stylesheets="@Style.css" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="hospitalappointmentsystem.SignUpController">
+   <left>
+      <VBox fx:id="leftPane" alignment="TOP_CENTER" prefHeight="600.0" prefWidth="450" spacing="5.0" styleClass="glass-background">
+         <VBox.margin>
+            <Insets bottom="40" left="50" right="50" top="40" />
+         </VBox.margin>
+         <children>
+            <ImageView fx:id="logoImage" fitHeight="80.0" fitWidth="50.0" preserveRatio="true" styleClass="hover-image">
+               <image>
+                  <Image url="@../image/DocSetGo%20Logo.png" />
+               </image>
+            </ImageView>
+            <TextField fx:id="tfFullname" promptText="Fullname" styleClass="form-input" />
+            <TextField fx:id="tfUsername" layoutX="20.0" layoutY="205.0" promptText="Username" styleClass="form-input" />
+            <TextField fx:id="tfContact" promptText="Contact" styleClass="form-input" />
+            <PasswordField fx:id="pfPassword" promptText="Password" styleClass="form-input" />
+            <PasswordField fx:id="pfConfirmPassword" layoutX="20.0" layoutY="458.0" promptText="Confirm password" styleClass="form-input" />
+            <ComboBox fx:id="comboBoxRole" prefHeight="44.0" prefWidth="430.0" promptText="Select role" styleClass="form-input" />
+            <VBox fx:id="doctorFields" managed="false" prefHeight="200.0" prefWidth="100.0" spacing="5.0" visible="false">
+               <children>
+                  <TextField fx:id="tfDept" promptText="Department" styleClass="form-input" />
+                  <TextField fx:id="tfDesc" promptText="Doctor details" styleClass="form-input" />
+                  <HBox alignment="CENTER" prefHeight="23.0" prefWidth="480.0" spacing="1.0">
+                     <children>
+                        <Label prefHeight="20.0" prefWidth="94.0" styleClass="view-input" text="Duty start:" />
+                        <ComboBox fx:id="SthourComboBox" prefWidth="150.0" promptText="Hour" styleClass="duty-input" />
+                        <ComboBox fx:id="StminComboBox" prefWidth="150.0" promptText="Minute" styleClass="duty-input" />
+                        <ComboBox fx:id="StampmComboBox" prefWidth="150.0" promptText="AM/PM" styleClass="duty-input" />
+                     </children>
+                  </HBox>
+                  <HBox alignment="CENTER" prefHeight="23.0" prefWidth="480.0" spacing="1.0">
+                     <children>
+                        <Label prefHeight="20.0" prefWidth="94.0" styleClass="view-input" text="Duty end:" />
+                        <ComboBox fx:id="EndhourComboBox" prefWidth="150.0" promptText="Hour" styleClass="duty-input" />
+                        <ComboBox fx:id="EndminComboBox" prefWidth="150.0" promptText="Minute" styleClass="duty-input" />
+                        <ComboBox fx:id="EndampmComboBox" prefWidth="150.0" promptText="AM/PM" styleClass="duty-input" />
+                     </children>
+                  </HBox>
+               </children>
+            </VBox>
+            <Button fx:id="signupBtn" onAction="#SignUp" styleClass="signup-button" text="Sign Up" />
+            <HBox alignment="CENTER" spacing="5">
+               <children>
+                  <Label styleClass="subtitle" text="Already have an account?" />
+                  <Hyperlink fx:id="SigninLink" onAction="#goToLogin" text="Sign in">
+                     <styleClass>
+                        <String fx:value="footer-link" />
+                        <String fx:value="hover-image" />
+                     </styleClass>
+                  </Hyperlink>
+               </children>
+            </HBox>
+         </children>
+      </VBox>
+   </left>
+   <right>
+      <VBox alignment="CENTER" prefHeight="600.0" prefWidth="450" spacing="20" styleClass="right-pane-background">
+         <children>
+            <ImageView fx:id="logoImage1" fitHeight="250.0" fitWidth="250.0" layoutX="181.0" layoutY="185.0" preserveRatio="true" styleClass="hover-image">
+               <image>
+                  <Image url="@../image/DocSetGo%20Logo.png" />
+               </image>
+            </ImageView>
+         </children>
+      </VBox>
+   </right>
+</BorderPane>

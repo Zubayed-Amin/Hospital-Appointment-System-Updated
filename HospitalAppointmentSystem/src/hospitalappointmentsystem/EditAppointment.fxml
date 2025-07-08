@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<AnchorPane prefHeight="600.0" prefWidth="450.0" stylesheets="@Style.css" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="hospitalappointmentsystem.EditAppointmentController">
+   <children>
+      <VBox alignment="CENTER" prefHeight="650.0" prefWidth="450.0" spacing="15.0" styleClass="glass-background">
+         <children>
+            <ImageView fx:id="logoImage" fitHeight="80.0" fitWidth="80.0" preserveRatio="true" styleClass="hover-image">
+               <image>
+                  <Image url="@../image/DocSetGo%20Logo.png" />
+               </image>
+            </ImageView>
+            <Label alignment="CENTER" prefHeight="35.0" prefWidth="321.0" styleClass="main-title" text="Appointment Dashboard" />
+            <TextField fx:id="tffullname" promptText="Enter fullname" styleClass="form-input" />
+            <TextField fx:id="tfcontact" promptText="enter contact number" styleClass="form-input" />
+            <ComboBox id="patient" fx:id="deptComboBox" prefHeight="44.0" prefWidth="479.0" promptText="Select Department" styleClass="form-input" />
+            <TextField fx:id="tfDesc" promptText="Doctor description" styleClass="form-input" />
+            <ComboBox id="patient" fx:id="doctorComboBox" prefHeight="44.0" prefWidth="477.0" promptText="Select Doctor" styleClass="form-input" />
+            <DatePicker fx:id="datePicker" prefHeight="37.0" prefWidth="477.0" promptText="select date" styleClass="form-input" />
+            <HBox alignment="CENTER" prefHeight="23.0" prefWidth="480.0" spacing="5.0">
+               <children>
+                  <ComboBox fx:id="hourComboBox" prefWidth="150.0" promptText="Hour" styleClass="form-input" />
+                  <ComboBox fx:id="minComboBox" prefWidth="150.0" promptText="Minute" styleClass="form-input" />
+                  <ComboBox fx:id="ampmComboBox" prefWidth="150.0" promptText="AM/PM" styleClass="form-input" />
+               </children>
+            </HBox>
+            <HBox alignment="CENTER" prefHeight="23.0" prefWidth="480.0" spacing="50.0">
+               <children>
+                  <Button fx:id="updateBtn" onAction="#updateAppointment" prefHeight="40.0" prefWidth="181.0" styleClass="signup-button" text="Update Appointment" />
+               </children>
+            </HBox>
+         </children>
+      </VBox>
+   </children>
+</AnchorPane>
