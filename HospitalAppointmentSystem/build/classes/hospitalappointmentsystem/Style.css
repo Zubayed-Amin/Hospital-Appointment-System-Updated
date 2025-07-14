@@ -106,3 +106,32 @@
     -fx-scale-y: 1.02;
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.4), 10, 0, 0, 4);
 }
+
+.table-view {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #2c3e50;
+    -fx-border-width: 1px;
+    -fx-table-cell-border-color: #dcdcdc;
+    -fx-padding: 5px;
+}
+
+.table-view .column-header {
+    -fx-background-color: #3498db;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+.table-row-cell {
+    -fx-background-color: white;
+    -fx-border-color: transparent;
+}
+
+.table-row-cell:filled:hover {
+    -fx-background-color: #ecf0f1;
+}
+
+.table-cell {
+    -fx-font-size: 14px;
+    -fx-text-fill: #2c3e50;
+    -fx-padding: 5px;
+}

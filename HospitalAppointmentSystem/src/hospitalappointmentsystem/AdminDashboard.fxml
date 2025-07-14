@@ -17,7 +17,7 @@
             <TableColumn fx:id="colUsername" prefWidth="108.00001525878906" text="Username" />
             <TableColumn fx:id="colPass" prefWidth="102.66668701171875" text="Password" />
                 <TableColumn fx:id="colRole" prefWidth="92.0" text="Role" />
-            <TableColumn fx:id="colContact" prefWidth="129.33328247070312" text="Contact" />
+            <TableColumn fx:id="colContact" prefWidth="116.66659545898438" text="Contact" />
             </columns>
         </TableView>
 
