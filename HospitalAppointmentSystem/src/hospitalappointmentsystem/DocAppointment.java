@@ -4,7 +4,6 @@
  */
 package hospitalappointmentsystem;
 
-import java.time.LocalDate;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 

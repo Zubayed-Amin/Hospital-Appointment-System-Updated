@@ -53,7 +53,7 @@ public class DoctorDashboardController implements Initializable {
 
         colStatus.setCellFactory(column -> new TableCell<DocAppointment, String>() {
             private final ComboBox<String> comboBox = new ComboBox<>(
-                    FXCollections.observableArrayList("Pending", "Approved", "Rejected")
+                    FXCollections.observableArrayList("Pending", "Accepted", "Rejected", "Completed")
             );
 
             {
@@ -146,7 +146,7 @@ public class DoctorDashboardController implements Initializable {
 
     @FXML
     private void Logout(ActionEvent event) throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("LoginSignup.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("Login.fxml"));
         Parent root = loader.load();
         Stage stage = new Stage();
         stage.setScene(new Scene(root));

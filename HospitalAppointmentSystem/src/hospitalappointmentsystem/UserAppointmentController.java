@@ -12,9 +12,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.Set;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -93,7 +96,8 @@ public class UserAppointmentController implements Initializable {
 //        ampmComboBox.getItems().addAll("AM", "PM");
 
         loadDepartments();
-        onDoctorOrDateChanged();
+        doctorComboBox.setOnAction(e -> onDoctorOrDateChanged());
+        datePicker.setOnAction(e -> onDoctorOrDateChanged());
 
         // 🔄 When a department is selected, show related doctors + description
         deptComboBox.setOnAction(e -> {
@@ -120,7 +124,7 @@ public class UserAppointmentController implements Initializable {
     
     private void loadDoctorsAndDepartmentDescription(String department) {
         doctorComboBox.getItems().clear();
-        String deptDescription = "";
+        tfDesc.clear();
 
         try (Connection conn = ConnectionDB.getConnection()) {
             String sql = "SELECT fullname, description FROM users WHERE role = 'doctor' AND department = ?";
@@ -134,12 +138,10 @@ public class UserAppointmentController implements Initializable {
 
                 // Only take description from first doctor found
                 if (first) {
-                    deptDescription = rs.getString("description");
+                    tfDesc.setText(rs.getString("description"));
                     first = false;
                 }
             }
-
-            tfDesc.setText(deptDescription != null ? deptDescription : "");
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -157,66 +159,56 @@ public class UserAppointmentController implements Initializable {
         ampmComboBox.getItems().clear();
 
         try (Connection conn = ConnectionDB.getConnection()) {
-            // Step 1: Get doctor’s duty time
             String dutySql = "SELECT duty_time FROM users WHERE fullname = ?";
-            PreparedStatement dutyStmt = conn.prepareStatement(dutySql);
-            dutyStmt.setString(1, doctor);
-            ResultSet dutyRs = dutyStmt.executeQuery();
+            try (PreparedStatement dutyStmt = conn.prepareStatement(dutySql)) {
+                dutyStmt.setString(1, doctor);
+                ResultSet dutyRs = dutyStmt.executeQuery();
 
-            if (dutyRs.next()) {
-                String dutyTime = dutyRs.getString("duty_time"); // Example: 7:00AM-12:00PM
-                String[] dutySplit = dutyTime.split("-");
-                String startTime = dutySplit[0];
-                String endTime = dutySplit[1];
+                if (dutyRs.next()) {
+                    String dutyTime = dutyRs.getString("duty_time");
+                    String[] dutySplit = dutyTime.split("-");
+                    LocalTime start = convertTo24Hour(dutySplit[0]);
+                    LocalTime end = convertTo24Hour(dutySplit[1]);
 
-                // Convert to 24-hour
-                java.time.LocalTime start = convertTo24Hour(startTime);
-                java.time.LocalTime end = convertTo24Hour(endTime);
+                    String bookedSql = "SELECT appointment_time FROM appointment WHERE doctor_name = ? AND appointment_date = ?";
+                    try (PreparedStatement bookedStmt = conn.prepareStatement(bookedSql)) {
+                        bookedStmt.setString(1, doctor);
+                        bookedStmt.setDate(2, java.sql.Date.valueOf(selectedDate));
+                        ResultSet bookedRs = bookedStmt.executeQuery();
 
-                // Step 2: Get booked appointment times
-                String bookedSql = "SELECT appointment_time FROM appointment WHERE doctor_name = ? AND appointment_date = ?";
-                PreparedStatement bookedStmt = conn.prepareStatement(bookedSql);
-                bookedStmt.setString(1, doctor);
-                bookedStmt.setDate(2, java.sql.Date.valueOf(selectedDate));
-                ResultSet bookedRs = bookedStmt.executeQuery();
-
-                java.util.List<String> booked = new java.util.ArrayList<>();
-                while (bookedRs.next()) {
-                    booked.add(bookedRs.getString("appointment_time"));
-                }
-
-                // Step 3: Generate available slots every 30 mins
-                java.time.LocalTime current = start;
-                while (!current.isAfter(end.minusMinutes(30))) {
-                    String slot = formatTo12Hour(current);
-                    if (!booked.contains(slot)) {
-                        String[] parts = slot.split("[: ]");
-                        hourComboBox.getItems().add(parts[0]);
-                        if (!minComboBox.getItems().contains(parts[1])) {
-                            minComboBox.getItems().add(parts[1]);
+                        Set<String> booked = new HashSet<>();
+                        while (bookedRs.next()) {
+                            booked.add(bookedRs.getString("appointment_time"));
                         }
-                        if (!ampmComboBox.getItems().contains(parts[2])) {
-                            ampmComboBox.getItems().add(parts[2]);
+
+                        LocalTime current = start;
+                        while (!current.isAfter(end.minusMinutes(30))) {
+                            String slot = formatTo12Hour(current);
+                            if (!booked.contains(slot)) {
+                                String[] parts = slot.split("[: ]");
+                                hourComboBox.getItems().add(parts[0]);
+                                if (!minComboBox.getItems().contains(parts[1])) minComboBox.getItems().add(parts[1]);
+                                if (!ampmComboBox.getItems().contains(parts[2])) ampmComboBox.getItems().add(parts[2]);
+                            }
+                            current = current.plusMinutes(30);
                         }
                     }
-                    current = current.plusMinutes(30);
                 }
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private java.time.LocalTime convertTo24Hour(String timeStr) {
+    private LocalTime convertTo24Hour(String timeStr) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("h:mma", Locale.ENGLISH);
-        return java.time.LocalTime.parse(timeStr.toUpperCase().replaceAll("\\s+", ""), formatter);
+        return LocalTime.parse(timeStr.toUpperCase().replaceAll("\\s+", ""), formatter);
     }
 
-    private String formatTo12Hour(java.time.LocalTime time) {
+    private String formatTo12Hour(LocalTime time) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("h:mm a", Locale.ENGLISH);
         return time.format(formatter);
-    }  
+    }
 
     @FXML
     private void BookAppointment(ActionEvent event) throws SQLException {
@@ -234,26 +226,29 @@ public class UserAppointmentController implements Initializable {
         String time = hour + ":" + minute + " " + ampm;
         
         String patientFullname = null;
+        String patientContact = null;
 
         try (Connection conn = ConnectionDB.getConnection()) {
-            String fetchNameSQL = "SELECT fullname FROM users WHERE username = ?";
+            String fetchNameSQL = "SELECT fullname, contact FROM users WHERE username = ?";
             try (PreparedStatement fetchStmt = conn.prepareStatement(fetchNameSQL)) {
                 fetchStmt.setString(1, patientUsername);
                 ResultSet rs = fetchStmt.executeQuery();
                 if (rs.next()) {
                     patientFullname = rs.getString("fullname");
+                    patientContact = rs.getString("contact");
                 } else {
                     System.out.println("Patient not found.");
                     return;
                 }
             }
 
-            String sql = "INSERT INTO appointment (patient_name, doctor_name, doctor_contact, appointment_date, appointment_time, status) VALUES (?, ?, ?, ?, ?, 'pending')";
+            String sql = "INSERT INTO appointment (patient_name, doctor_name, patient_contact, appointment_date, appointment_time, status) VALUES (?, ?, ?, ?, ?, 'pending')";
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, patientFullname);
             ps.setString(2, doctor);
-            ps.setDate(3, Date.valueOf(date));
-            ps.setString(4, time);
+            ps.setString(3, patientContact);
+            ps.setDate(4, java.sql.Date.valueOf(date));
+            ps.setString(5, time);
 
                 int rows = ps.executeUpdate();
                 if (rows > 0) {
@@ -291,8 +286,6 @@ public class UserAppointmentController implements Initializable {
         stage.setScene(new Scene(root));
         stage.setTitle("Login Form");
         stage.show();
-
-        // Close current window
         ((Stage) logoutBtn.getScene().getWindow()).close();
     }
 

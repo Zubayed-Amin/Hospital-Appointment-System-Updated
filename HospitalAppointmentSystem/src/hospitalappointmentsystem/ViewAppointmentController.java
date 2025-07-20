@@ -146,8 +146,6 @@ public class ViewAppointmentController implements Initializable {
         stage.setScene(new Scene(root));
         stage.setTitle("Login Form");
         stage.show();
-
-        // Close current window
         ((Stage) logoutBtn.getScene().getWindow()).close();
     }
     

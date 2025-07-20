@@ -11,9 +11,9 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<AnchorPane prefHeight="500.0" prefWidth="450.0" stylesheets="@Style.css" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="hospitalappointmentsystem.UserAppointmentController">
+<AnchorPane prefHeight="550.0" prefWidth="450.0" stylesheets="@Style.css" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="hospitalappointmentsystem.UserAppointmentController">
    <children>
-      <VBox alignment="CENTER" prefHeight="500.0" prefWidth="450.0" spacing="10.0" styleClass="glass-background" stylesheets="@Style.css">
+      <VBox alignment="CENTER" prefHeight="550.0" prefWidth="450.0" spacing="10.0" styleClass="glass-background" stylesheets="@Style.css">
          <children>
             <ImageView fx:id="logoImage" fitHeight="80.0" fitWidth="80.0" preserveRatio="true" styleClass="hover-image">
                <image>

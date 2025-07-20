@@ -124,7 +124,7 @@ public class AdminAddUserController implements Initializable {
         alert.setTitle("DocSetGo");
         alert.setHeaderText(null);
         alert.setContentText(message);
-        alert.getDialogPane().getStylesheets().add(getClass().getResource("Styles.css").toExternalForm());
+        alert.getDialogPane().getStylesheets().add(getClass().getResource("Style.css").toExternalForm());
         alert.getDialogPane().getStyleClass().add("glass-background");
         alert.showAndWait();
     }

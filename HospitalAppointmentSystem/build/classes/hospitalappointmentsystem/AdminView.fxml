@@ -11,8 +11,8 @@
             <Label layoutX="175.0" layoutY="13.0" styleClass="main-title" text="Admin View Appointmnets" />
             <TableView fx:id="appointmentTable" layoutX="27.0" layoutY="69.0" prefHeight="300.0" prefWidth="600.0">
                <columns>
-                  <TableColumn fx:id="colPName" prefWidth="158.00002479553223" text="Patient Name" />
-                  <TableColumn fx:id="colPcontact" prefWidth="113.33335876464844" text="Contact" />
+                  <TableColumn fx:id="colPName" prefWidth="141.3333396911621" text="Patient Name" />
+                  <TableColumn fx:id="colDName" prefWidth="131.3333282470703" text="Doctor Name" />
                   <TableColumn fx:id="colDate" prefWidth="114.0" text="Date" />
                   <TableColumn fx:id="colTime" minWidth="0.0" prefWidth="97.3333740234375" text="Time" />
                   <TableColumn fx:id="colStatus" prefWidth="112.6666259765625" text="Status" />
