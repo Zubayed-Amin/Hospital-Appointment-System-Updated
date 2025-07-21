@@ -4,16 +4,16 @@
  */
 package hospitalappointmentsystem;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+import java.io.IOException;
+import java.net.URL;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.io.IOException;
-import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -25,14 +25,12 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.stage.Stage;
 
-
-
 /**
  * FXML Controller class
  *
  * @author zubay
  */
-public class AdminViewController implements Initializable {
+public class AdminCompletedController implements Initializable {
 
     @FXML
     private TableView<AdminAppointment> appointmentTable;
@@ -50,10 +48,6 @@ public class AdminViewController implements Initializable {
     private Button backBtn;
     @FXML
     private Button logoutBtn;
-    @FXML
-    private Button completedBtn;
-    @FXML
-    private Button rejectedBtn;
 
     /**
      * Initializes the controller class.
@@ -66,16 +60,16 @@ public class AdminViewController implements Initializable {
         colTime.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getTime()));
         colStatus.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getStatus()));
 
-        loadAllAppointments();
+        loadCompletedAppointments();
     }    
 
-    private void loadAllAppointments() {
+    private void loadCompletedAppointments() {
         ObservableList<AdminAppointment> list = FXCollections.observableArrayList();
 
-        // 1. Load from 'appointment' table (registered patients)
-        String sql1 = "SELECT id, patient_name, doctor_name, appointment_date, appointment_time, status FROM appointment";
+        String sql = "SELECT * FROM rejected_appointments";
+
         try (Connection conn = ConnectionDB.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql1);
+             PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
@@ -88,65 +82,22 @@ public class AdminViewController implements Initializable {
                     rs.getString("status")
                 ));
             }
+
+            appointmentTable.setItems(list);
         } catch (SQLException e) {
-            System.out.println("Error loading appointment table: " + e.getMessage());
+            System.out.println("Error loading rejected_appointments table: " + e.getMessage());
         }
-
-        // 2. Load from 'guest_appointment' table
-        String sql2 = "SELECT ga.id, ga.patient_name, ga.doctor_name, ga.appointment_date, ga.appointment_time, ga.status " +
-                      "FROM guest_appointment";
-        try (Connection conn = ConnectionDB.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql2);
-             ResultSet rs = ps.executeQuery()) {
-
-            while (rs.next()) {
-                list.add(new AdminAppointment(
-                    rs.getInt("id"),
-                    rs.getString("patient_name"),
-                    rs.getString("doctor_name"),
-                    rs.getString("appointment_date"),
-                    rs.getString("appointment_time"),
-                    rs.getString("status")
-                ));
-            }
-        } catch (SQLException e) {
-            System.out.println("Error loading guest_appointment table: " + e.getMessage());
-        }
-
-        appointmentTable.setItems(list);
-    }
-    
-    @FXML
-    private void Completed(ActionEvent event) throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("AdminCompleted.fxml"));
-        Parent root = loader.load();
-        Stage stage = new Stage();
-        stage.setScene(new Scene(root));
-        stage.setTitle("Admin Completed");
-        stage.show();
-        ((Stage) backBtn.getScene().getWindow()).close();
-    }
-
-    @FXML
-    private void Rejected(ActionEvent event) throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("AdminRejected.fxml"));
-        Parent root = loader.load();
-        Stage stage = new Stage();
-        stage.setScene(new Scene(root));
-        stage.setTitle("Admin Rejected");
-        stage.show();
-        ((Stage) backBtn.getScene().getWindow()).close();
     }
     
     @FXML
     private void goBack(ActionEvent event) throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("AdminDashboard.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("AdminView.fxml"));
         Parent root = loader.load();
         Stage stage = new Stage();
         stage.setScene(new Scene(root));
-        stage.setTitle("Admin Dashboard");
+        stage.setTitle("Admin View");
         stage.show();
-        ((Stage) backBtn.getScene().getWindow()).close();
+        ((Stage) logoutBtn.getScene().getWindow()).close();
     }
 
     @FXML
@@ -158,5 +109,6 @@ public class AdminViewController implements Initializable {
         stage.setTitle("Login Form");
         stage.show();
         ((Stage) logoutBtn.getScene().getWindow()).close();
-    }  
+    }
+    
 }

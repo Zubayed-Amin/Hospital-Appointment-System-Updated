@@ -23,13 +23,14 @@
                     <TableColumn fx:id="colStatus" prefWidth="132.0" text="Status" />
                 </columns>
             </TableView>
-         <HBox prefHeight="100.0" prefWidth="200.0" spacing="450.0">
+         <HBox prefHeight="100.0" prefWidth="200.0" spacing="150.0">
             <children>
-               <Button fx:id="backBtn" mnemonicParsing="false" onAction="#goBack" prefHeight="31.0" prefWidth="81.0" styleClass="signup-button" text="Back" />
-               <Button fx:id="logoutBtn" mnemonicParsing="false" onAction="#Logout" styleClass="signup-button" text="Logout" />
+               <Button fx:id="backBtn" mnemonicParsing="false" onAction="#goBack" prefHeight="40.0" prefWidth="99.0" styleClass="signup-button" text="Back" />
+               <Button fx:id="myhistoryBtn" mnemonicParsing="false" onAction="#MyHistory" styleClass="signup-button" text="My History" />
+               <Button fx:id="logoutBtn" mnemonicParsing="false" onAction="#Logout" prefHeight="40.0" prefWidth="107.0" styleClass="signup-button" text="Logout" />
             </children>
             <padding>
-               <Insets left="23.0" top="10.0" />
+               <Insets left="25.0" top="10.0" />
             </padding>
             <VBox.margin>
                <Insets />

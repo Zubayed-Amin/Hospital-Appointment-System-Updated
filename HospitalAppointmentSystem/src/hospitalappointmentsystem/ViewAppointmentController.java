@@ -19,6 +19,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -47,8 +48,11 @@ public class ViewAppointmentController implements Initializable {
     private Button backBtn;
     @FXML
     private Button logoutBtn;
+    @FXML
+    private Button myhistoryBtn;
     
     private String username;
+    
     
     public void setUsername(String username) {
         this.username = username;
@@ -65,6 +69,37 @@ public class ViewAppointmentController implements Initializable {
         colDate.setCellValueFactory(new PropertyValueFactory<>("date"));
         colTime.setCellValueFactory(new PropertyValueFactory<>("time"));
         colStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
+        
+        // Set cell factory for the status column
+        colStatus.setCellFactory(column -> new TableCell<PatAppointment, String>() {
+        @Override
+        protected void updateItem(String status, boolean empty) {
+            super.updateItem(status, empty);
+            if (empty || status == null) {
+                setText(null);
+                setStyle("");
+                getStyleClass().removeAll("status-pending", "status-accepted", "status-rejected", "status-completed");
+            } else {
+                setText(status);
+                getStyleClass().removeAll("status-pending", "status-accepted", "status-rejected", "status-completed");
+
+                switch (status.toLowerCase()) {
+                    case "pending":
+                        getStyleClass().add("status-pending");
+                        break;
+                    case "accepted":
+                        getStyleClass().add("status-accepted");
+                        break;
+                    case "rejected":
+                        getStyleClass().add("status-rejected");
+                        break;
+                    case "completed":
+                        getStyleClass().add("status-completed");
+                        break;
+                }
+            }
+        }
+    });
     }    
 
     private void loadAppointments() {
@@ -147,6 +182,22 @@ public class ViewAppointmentController implements Initializable {
         stage.setTitle("Login Form");
         stage.show();
         ((Stage) logoutBtn.getScene().getWindow()).close();
+    }
+
+    @FXML
+    private void MyHistory(ActionEvent event) throws IOException {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("HistoryForPatient.fxml"));
+        Parent root = loader.load();
+
+        // Get the controller instance and pass the username
+        HistoryForPatientController controller = loader.getController();
+        controller.setUsername(username); // Make sure loggedInUsername is defined
+
+        // Show the new scene in the current window
+        Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
+        stage.setScene(new Scene(root));
+        stage.setTitle("My History");
+        stage.show();
     }
     
 }

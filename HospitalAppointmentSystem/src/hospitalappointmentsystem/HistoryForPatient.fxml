@@ -8,7 +8,7 @@
 
 <AnchorPane prefHeight="450.0" prefWidth="650.0" stylesheets="@Style.css" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="hospitalappointmentsystem.HistoryForPatientController">
    <children>
-      <Label layoutX="157.0" layoutY="23.0" styleClass="main-title" text="My Completed Appointmnets" />
+      <Label layoutX="262.0" layoutY="23.0" styleClass="main-title" text="My History" />
       <TableView fx:id="appointmentTable" layoutX="27.0" layoutY="69.0" prefHeight="300.0" prefWidth="600.0">
          <columns>
             <TableColumn fx:id="colDName" prefWidth="158.00002479553223" text="Doctor Name" />

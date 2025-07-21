@@ -7,7 +7,6 @@ package hospitalappointmentsystem;
 import java.io.IOException;
 import java.net.URL;
 import java.sql.Connection;
-import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -89,11 +88,6 @@ public class UserAppointmentController implements Initializable {
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-//        hourComboBox.getItems().addAll("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12");
-//
-//        minComboBox.getItems().addAll("00", "30");
-//
-//        ampmComboBox.getItems().addAll("AM", "PM");
 
         loadDepartments();
         doctorComboBox.setOnAction(e -> onDoctorOrDateChanged());
@@ -106,6 +100,7 @@ public class UserAppointmentController implements Initializable {
                 loadDoctorsAndDepartmentDescription(selectedDept);
             }
         });
+        
     }    
 
     private void loadDepartments() {
@@ -170,27 +165,40 @@ public class UserAppointmentController implements Initializable {
                     LocalTime start = convertTo24Hour(dutySplit[0]);
                     LocalTime end = convertTo24Hour(dutySplit[1]);
 
-                    String bookedSql = "SELECT appointment_time FROM appointment WHERE doctor_name = ? AND appointment_date = ?";
+                    String bookedSql = """
+                            SELECT appointment_time FROM appointment 
+                            WHERE doctor_name = ? AND appointment_date = ?
+                            UNION
+                            SELECT appointment_time FROM guest_appointment 
+                            WHERE doctor_name = ? AND appointment_date = ?
+                        """;
                     try (PreparedStatement bookedStmt = conn.prepareStatement(bookedSql)) {
                         bookedStmt.setString(1, doctor);
                         bookedStmt.setDate(2, java.sql.Date.valueOf(selectedDate));
+                        bookedStmt.setString(3, doctor);
+                        bookedStmt.setDate(4, java.sql.Date.valueOf(selectedDate));
                         ResultSet bookedRs = bookedStmt.executeQuery();
 
                         Set<String> booked = new HashSet<>();
                         while (bookedRs.next()) {
-                            booked.add(bookedRs.getString("appointment_time"));
+                            booked.add(bookedRs.getTime("appointment_time").toLocalTime().toString());  // 24-hour format, like "14:30"
                         }
 
                         LocalTime current = start;
                         while (!current.isAfter(end.minusMinutes(30))) {
-                            String slot = formatTo12Hour(current);
-                            if (!booked.contains(slot)) {
-                                String[] parts = slot.split("[: ]");
+                            String slotKey = current.toString(); // e.g. "14:30"
+                            if (!booked.contains(slotKey)) {
+                                String slotDisplay = formatTo12Hour(current); // for showing in combo boxes
+                                String[] parts = slotDisplay.split("[: ]");
                                 hourComboBox.getItems().add(parts[0]);
                                 if (!minComboBox.getItems().contains(parts[1])) minComboBox.getItems().add(parts[1]);
                                 if (!ampmComboBox.getItems().contains(parts[2])) ampmComboBox.getItems().add(parts[2]);
                             }
+
                             current = current.plusMinutes(30);
+                            System.out.println("Duty Start: " + start);
+                            System.out.println("Duty End: " + end);
+
                         }
                     }
                 }
@@ -201,9 +209,18 @@ public class UserAppointmentController implements Initializable {
     }
 
     private LocalTime convertTo24Hour(String timeStr) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("h:mma", Locale.ENGLISH);
-        return LocalTime.parse(timeStr.toUpperCase().replaceAll("\\s+", ""), formatter);
+    timeStr = timeStr.trim().toUpperCase().replaceAll("\\s+", ""); // Remove spaces
+    DateTimeFormatter formatter;
+
+    if (timeStr.contains(":")) {
+        formatter = DateTimeFormatter.ofPattern("h:mma", Locale.ENGLISH);
+    } else {
+        formatter = DateTimeFormatter.ofPattern("ha", Locale.ENGLISH); // e.g., 2PM
     }
+
+    return LocalTime.parse(timeStr, formatter);
+    }
+
 
     private String formatTo12Hour(LocalTime time) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("h:mm a", Locale.ENGLISH);
@@ -223,12 +240,33 @@ public class UserAppointmentController implements Initializable {
             return;
         }
 
-        String time = hour + ":" + minute + " " + ampm;
+        String timeStr = hour + ":" + minute + " " + ampm;
+        DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("h:mm a", Locale.ENGLISH);
+        LocalTime timeObj = LocalTime.parse(timeStr, inputFormatter);
+        String time = timeObj.toString();
         
         String patientFullname = null;
         String patientContact = null;
 
         try (Connection conn = ConnectionDB.getConnection()) {
+            // Check if selected time is within duty hours
+            String dutySql = "SELECT duty_time FROM users WHERE fullname = ?";
+            try (PreparedStatement dutyStmt = conn.prepareStatement(dutySql)) {
+                dutyStmt.setString(1, doctor);
+                ResultSet dutyRs = dutyStmt.executeQuery();
+
+                if (dutyRs.next()) {
+                    String[] dutySplit = dutyRs.getString("duty_time").split("-");
+                    LocalTime start = convertTo24Hour(dutySplit[0]);
+                    LocalTime end = convertTo24Hour(dutySplit[1]);
+
+                    if (timeObj.isBefore(start) || timeObj.isAfter(end.minusMinutes(30))) {
+                        System.out.println("Selected time is outside doctor's duty hours.");
+                        return;
+                    }
+                }
+            }
+
             String fetchNameSQL = "SELECT fullname, contact FROM users WHERE username = ?";
             try (PreparedStatement fetchStmt = conn.prepareStatement(fetchNameSQL)) {
                 fetchStmt.setString(1, patientUsername);
@@ -242,7 +280,7 @@ public class UserAppointmentController implements Initializable {
                 }
             }
 
-            String sql = "INSERT INTO appointment (patient_name, doctor_name, patient_contact, appointment_date, appointment_time, status) VALUES (?, ?, ?, ?, ?, 'pending')";
+            String sql = "INSERT INTO appointment (patient_name, doctor_name, patient_contact, appointment_date, appointment_time, status) VALUES (?, ?, ?, ?, ?, 'Pending')";
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, patientFullname);
             ps.setString(2, doctor);

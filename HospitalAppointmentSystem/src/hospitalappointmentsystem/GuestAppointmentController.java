@@ -16,6 +16,7 @@ import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 import javafx.event.ActionEvent;
+import javafx.scene.control.Button;
 
 public class GuestAppointmentController implements Initializable {
 
@@ -36,6 +37,8 @@ public class GuestAppointmentController implements Initializable {
 
     private int appointmentId; // Optional, if needed for editing
     private String guestContact;
+    @FXML
+    private Button backBtn;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -48,13 +51,13 @@ public class GuestAppointmentController implements Initializable {
 
         try (Connection conn = ConnectionDB.getConnection()) {
             String sql = """
-                SELECT g.id, g.patient_name, g.patient_contact, g.doctor_name,
+                SELECT g.id, a.patient_name, g.patient_contact, g.doctor_name,
                        u.contact AS doctor_contact,
                        g.appointment_date, g.appointment_time
                 FROM guest_appointment g
                 JOIN users u ON g.doctor_name = u.fullname
                 WHERE g.patient_contact = ?
-                ORDER BY g.id DESC LIMIT 1
+                ORDER BY g.id DESC
             """;
 
             PreparedStatement stmt = conn.prepareStatement(sql);
@@ -100,25 +103,6 @@ public class GuestAppointmentController implements Initializable {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-    }
-
-
-    // When Edit Appointment button is clicked
-    @FXML
-    private void EditAppointments(ActionEvent event) throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("EditAppointment.fxml"));
-        Parent root = loader.load();
-
-        EditAppointmentController controller = loader.getController();
-        controller.loadAppointmentData(appointmentId); // Load by ID
-
-        Stage stage = new Stage();
-        stage.setScene(new Scene(root));
-        stage.setTitle("Edit Appointment");
-        stage.show();
-
-        // Close current window
-        ((Stage) Pname.getScene().getWindow()).close();
     }
 
     

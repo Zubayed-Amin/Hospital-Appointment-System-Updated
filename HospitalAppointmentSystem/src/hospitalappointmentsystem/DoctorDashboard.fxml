@@ -11,13 +11,14 @@
       <Label layoutX="222.0" layoutY="21.0" styleClass="main-title" text="Doctor Dashboard" />
       <TableView fx:id="DocappointmentTable" layoutX="27.0" layoutY="69.0" prefHeight="300.0" prefWidth="600.0">
          <columns>
-            <TableColumn fx:id="colPName" prefWidth="158.00002479553223" text="Patient Name" />
-            <TableColumn fx:id="colPcontact" prefWidth="113.33335876464844" text="Contact" />
-            <TableColumn fx:id="colDate" prefWidth="114.0" text="Date" />
-            <TableColumn fx:id="colTime" minWidth="0.0" prefWidth="97.3333740234375" text="Time" />
-            <TableColumn fx:id="colStatus" prefWidth="112.6666259765625" text="Status" />
+            <TableColumn fx:id="colPName" prefWidth="128.66668319702148" text="Patient Name" />
+            <TableColumn fx:id="colPcontact" prefWidth="108.66670227050781" text="Contact" />
+            <TableColumn fx:id="colDate" prefWidth="100.0" text="Date" />
+            <TableColumn fx:id="colTime" minWidth="0.0" prefWidth="90.0" text="Time" />
+            <TableColumn fx:id="colStatus" prefWidth="170.66665649414062" text="Status" />
          </columns>
       </TableView>
-      <Button fx:id="logoutBtn" layoutX="285.0" layoutY="396.0" onAction="#Logout" styleClass="signup-button" text="Logout" />
+      <Button fx:id="logoutBtn" layoutX="516.0" layoutY="396.0" onAction="#Logout" styleClass="signup-button" text="Logout" />
+      <Button fx:id="historyBtn" layoutX="60.0" layoutY="396.0" onAction="#History" prefHeight="40.0" prefWidth="109.0" styleClass="signup-button" text="History" />
    </children>
 </AnchorPane>

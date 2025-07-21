@@ -6,7 +6,13 @@ package hospitalappointmentsystem;
 
 import java.io.IOException;
 import java.net.URL;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ResourceBundle;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -16,6 +22,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 
 /**
@@ -41,14 +48,89 @@ public class HistoryForPatientController implements Initializable {
     private Button backBtn;
     @FXML
     private Button logoutBtn;
+    
+    private String loggedInUsername;
+
+    public void setUsername(String username) {
+        this.loggedInUsername = username;
+        loadHistoryAppointments();
+    }
+
 
     /**
      * Initializes the controller class.
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        // TODO
+        colDName.setCellValueFactory(new PropertyValueFactory<>("doctor"));
+        colDcontact.setCellValueFactory(new PropertyValueFactory<>("contact"));
+        colDate.setCellValueFactory(new PropertyValueFactory<>("date"));
+        colTime.setCellValueFactory(new PropertyValueFactory<>("time"));
+        colStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
     }    
+    
+    private void loadHistoryAppointments() {
+        if (loggedInUsername == null || loggedInUsername.isEmpty()) {
+            System.out.println("Username not set.");
+            return;
+        }
+        ObservableList<PatAppointment> list = FXCollections.observableArrayList();
+
+        try (Connection conn = ConnectionDB.getConnection()) {
+            // 1. Get fullname for the logged-in username
+            String fullname = null;
+            String fullnameQuery = "SELECT fullname FROM users WHERE username = ?";
+            PreparedStatement ps1 = conn.prepareStatement(fullnameQuery);
+            ps1.setString(1, loggedInUsername);
+            ResultSet rs1 = ps1.executeQuery();
+            if (rs1.next()) {
+                fullname = rs1.getString("fullname");
+            } else {
+                System.out.println("Fullname not found for username: " + loggedInUsername);
+                return; // No fullname found, so no appointments
+            }
+
+            // 2. Query rejected and completed appointments by fullname
+            String sql = """
+                SELECT doctor_name, contact, appointment_date, appointment_time, status
+                FROM rejected_appointments
+                WHERE patient_name = ?
+
+                UNION ALL
+
+                SELECT doctor_name, contact, appointment_date, appointment_time, status
+                FROM completed_appointments
+                WHERE patient_name = ?
+
+                ORDER BY appointment_date DESC
+            """;
+
+            PreparedStatement ps2 = conn.prepareStatement(sql);
+            ps2.setString(1, fullname);
+            ps2.setString(2, fullname);
+            ResultSet rs2 = ps2.executeQuery();
+
+            // 3. Read results and add to the list
+            while (rs2.next()) {
+                list.add(new PatAppointment(
+                    0, // id not available here; set 0 or modify model accordingly
+                    rs2.getString("doctor_name"),
+                    rs2.getString("contact"),
+                    rs2.getString("appointment_date"),
+                    rs2.getString("appointment_time"),
+                    rs2.getString("status"),
+                    rs2.getString("status")
+                ));
+            }
+
+            // 4. Set items to TableView
+            appointmentTable.setItems(list);
+
+        } catch (SQLException e) {
+            System.out.println("Error loading history: " + e.getMessage());
+        }
+    }
+
 
     @FXML
     private void goBack(ActionEvent event) throws IOException {

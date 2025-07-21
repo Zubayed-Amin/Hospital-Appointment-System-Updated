@@ -13,7 +13,7 @@
 
 <AnchorPane prefHeight="600.0" prefWidth="450.0" stylesheets="@Style.css" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="hospitalappointmentsystem.EditAppointmentController">
    <children>
-      <VBox alignment="CENTER" prefHeight="650.0" prefWidth="450.0" spacing="15.0" styleClass="glass-background">
+      <VBox alignment="CENTER" prefHeight="600.0" prefWidth="450.0" spacing="10.0" styleClass="glass-background">
          <children>
             <ImageView fx:id="logoImage" fitHeight="80.0" fitWidth="80.0" preserveRatio="true" styleClass="hover-image">
                <image>

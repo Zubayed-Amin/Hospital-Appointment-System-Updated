@@ -135,3 +135,27 @@
     -fx-text-fill: #2c3e50;
     -fx-padding: 5px;
 }
+
+.status-pending {
+    -fx-background-color: #fff3cd; /* light yellow */
+    -fx-text-fill: #856404;
+    -fx-font-weight: bold;
+}
+
+.status-accepted {
+    -fx-background-color: #d4edda; /* light green */
+    -fx-text-fill: #155724;
+    -fx-font-weight: bold;
+}
+
+.status-rejected {
+    -fx-background-color: #f8d7da; /* light red */
+    -fx-text-fill: #721c24;
+    -fx-font-weight: bold;
+}
+
+.status-completed {
+    -fx-background-color: #d1ecf1; /* light blue */
+    -fx-text-fill: #0c5460;
+    -fx-font-weight: bold;
+}
