@@ -19,7 +19,9 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -52,6 +54,7 @@ public class HistoryForDoctorController implements Initializable {
 
     public void setUsername(String username) {
         this.loggedInUsername = username;
+        System.out.println("History username set to: " + username);
         loadHistoryAppointments();
     }
     /**
@@ -64,11 +67,51 @@ public class HistoryForDoctorController implements Initializable {
         colDate.setCellValueFactory(new PropertyValueFactory<>("date"));
         colTime.setCellValueFactory(new PropertyValueFactory<>("time"));
         colStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
+        loadHistoryAppointments();
+        colStatus.setCellFactory(column -> new TableCell<DocAppointment, String>() {
+        @Override
+        protected void updateItem(String status, boolean empty) {
+            super.updateItem(status, empty);
+            if (empty || status == null) {
+                setText(null);
+                setStyle("");
+                getStyleClass().removeAll("status-pending", "status-accepted", "status-rejected", "status-completed");
+            } else {
+                setText(status);
+                getStyleClass().removeAll("status-pending", "status-accepted", "status-rejected", "status-completed");
+
+                switch (status.toLowerCase()) {
+                    case "pending":
+                        getStyleClass().add("status-pending");
+                        break;
+                    case "accepted":
+                        getStyleClass().add("status-accepted");
+                        break;
+                    case "rejected":
+                        getStyleClass().add("status-rejected");
+                        break;
+                    case "completed":
+                        getStyleClass().add("status-completed");
+                        break;
+                }
+            }
+        }
+    });
     }    
+    
+    private void showAlert(Alert.AlertType type, String message) {
+        Alert alert = new Alert(type, message);
+        alert.setTitle("DocSetGo");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.getDialogPane().getStylesheets().add(getClass().getResource("Style.css").toExternalForm());
+        alert.getDialogPane().getStyleClass().add("glass-background");
+        alert.showAndWait();
+    }
     
     private void loadHistoryAppointments() {
         if (loggedInUsername == null || loggedInUsername.isEmpty()) {
-            System.out.println("Username not set.");
+            System.out.println( "Username not set.");
             return;
         }
         ObservableList<DocAppointment> list = FXCollections.observableArrayList();
@@ -83,7 +126,7 @@ public class HistoryForDoctorController implements Initializable {
             if (rs1.next()) {
                 fullname = rs1.getString("fullname");
             } else {
-                System.out.println("Fullname not found for username: " + loggedInUsername);
+                System.out.println( "Fullname not found for username: " + loggedInUsername);
                 return; // No fullname found, so no appointments
             }
 
@@ -123,7 +166,7 @@ public class HistoryForDoctorController implements Initializable {
             DocappointmentTable.setItems(list);
 
         } catch (SQLException e) {
-            System.out.println("Error loading history: " + e.getMessage());
+            System.out.println( "Error loading history: " + e.getMessage());
         }
     }
 
@@ -143,6 +186,9 @@ public class HistoryForDoctorController implements Initializable {
     private void goBack(ActionEvent event) throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("DoctorDashboard.fxml"));
         Parent root = loader.load();
+        DoctorDashboardController controller = loader.getController();
+        controller.setDoctorUsername(loggedInUsername);  // Pass username back ✅
+
         Stage stage = new Stage();
         stage.setScene(new Scene(root));
         stage.setTitle("Doctor Dashboard");

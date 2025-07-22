@@ -18,6 +18,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
@@ -56,6 +57,7 @@ public class ViewAppointmentController implements Initializable {
     
     public void setUsername(String username) {
         this.username = username;
+        System.out.println("Username set to: " + username);
         loadAppointments(); // Load when set
     }
 
@@ -69,7 +71,7 @@ public class ViewAppointmentController implements Initializable {
         colDate.setCellValueFactory(new PropertyValueFactory<>("date"));
         colTime.setCellValueFactory(new PropertyValueFactory<>("time"));
         colStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
-        
+        loadAppointments();
         // Set cell factory for the status column
         colStatus.setCellFactory(column -> new TableCell<PatAppointment, String>() {
         @Override
@@ -102,6 +104,16 @@ public class ViewAppointmentController implements Initializable {
     });
     }    
 
+    private void showAlert(Alert.AlertType type, String message) {
+        Alert alert = new Alert(type, message);
+        alert.setTitle("DocSetGo");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.getDialogPane().getStylesheets().add(getClass().getResource("Style.css").toExternalForm());
+        alert.getDialogPane().getStyleClass().add("glass-background");
+        alert.showAndWait();
+    }
+    
     private void loadAppointments() {
         if (username == null || username.isEmpty()) {
             System.out.println("Username not set.");
@@ -164,12 +176,13 @@ public class ViewAppointmentController implements Initializable {
     private void goBack(ActionEvent event) throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("UserAppointment.fxml"));
         Parent root = loader.load();
+        UserAppointmentController controller = loader.getController();
+        controller.setPatientUsername(username);  // Pass username back ✅
+
         Stage stage = new Stage();
         stage.setScene(new Scene(root));
         stage.setTitle("Appointment Dashboard");
         stage.show();
-
-        // Close current window
         ((Stage) backBtn.getScene().getWindow()).close();
     }
 
@@ -189,11 +202,9 @@ public class ViewAppointmentController implements Initializable {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("HistoryForPatient.fxml"));
         Parent root = loader.load();
 
-        // Get the controller instance and pass the username
         HistoryForPatientController controller = loader.getController();
-        controller.setUsername(username); // Make sure loggedInUsername is defined
+        controller.setUsername(username); // ✅ Set the username again
 
-        // Show the new scene in the current window
         Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
         stage.setScene(new Scene(root));
         stage.setTitle("My History");

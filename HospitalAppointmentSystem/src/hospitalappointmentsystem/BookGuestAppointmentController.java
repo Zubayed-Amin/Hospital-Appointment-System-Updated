@@ -24,6 +24,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
@@ -63,30 +64,6 @@ public class BookGuestAppointmentController implements Initializable {
     private Hyperlink SigninLink;
     @FXML
     private DatePicker datePicker;
-
-//    private int patient_id;
-//    private String patientUsername;
-//    
-//    
-//    public void setPatientId(int id) {
-//    this.patient_id = id;
-//    }
-//
-//    public void setPatientUsername(String username) {
-//        this.patientUsername = username;
-//        try (Connection conn = ConnectionDB.getConnection()) {
-//            String sql = "SELECT id FROM users WHERE username = ?";
-//            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-//                stmt.setString(1, username);
-//                ResultSet rs = stmt.executeQuery();
-//                if (rs.next()) {
-//                    this.patient_id = rs.getInt("id");
-//                }
-//            }
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//    }
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -103,6 +80,16 @@ public class BookGuestAppointmentController implements Initializable {
             }
         });
     }    
+    
+    private void showAlert(Alert.AlertType type, String message) {
+        Alert alert = new Alert(type, message);
+        alert.setTitle("DocSetGo");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.getDialogPane().getStylesheets().add(getClass().getResource("Style.css").toExternalForm());
+        alert.getDialogPane().getStyleClass().add("glass-background");
+        alert.showAndWait();
+    }
 
     private void loadDepartments() {
         try (Connection conn = ConnectionDB.getConnection()) {
@@ -196,10 +183,10 @@ public class BookGuestAppointmentController implements Initializable {
                             }
 
                             current = current.plusMinutes(30);
-                            System.out.println("Duty Start: " + start);
-                            System.out.println("Duty End: " + end);
+                            
 
                         }
+                            showAlert(Alert.AlertType.ERROR, "Duty Start: " + start + "\nDuty End: " + end);
                     }
                 }
             }
@@ -238,7 +225,7 @@ public class BookGuestAppointmentController implements Initializable {
         String contact = tfcontact.getText();
 
         if (patientName == null || contact == null || department == null || doctor == null || date == null || hour == null || minute == null || ampm == null) {
-            System.out.println("Please fill in all fields.");
+            showAlert(Alert.AlertType.ERROR, "Please fill in all fields.");
             return;
         }
 
@@ -260,7 +247,7 @@ public class BookGuestAppointmentController implements Initializable {
                     LocalTime end = convertTo24Hour(dutySplit[1]);
 
                     if (timeObj.isBefore(start) || timeObj.isAfter(end.minusMinutes(30))) {
-                        System.out.println("Selected time is outside doctor's duty hours.");
+                        showAlert(Alert.AlertType.ERROR, "Selected time is outside doctor's duty hours.");
                         return;
                     }
                 }
@@ -272,7 +259,7 @@ public class BookGuestAppointmentController implements Initializable {
                 guestStmt.setString(2, contact);
                 guestStmt.executeUpdate();
             } catch (SQLException ex) {
-                System.out.println("Guest may already be added, continuing...");
+                showAlert(Alert.AlertType.ERROR, "Guest may already be added, continuing...");
             }
 
             String sql = "INSERT INTO guest_appointment (patient_name, doctor_name, patient_contact, appointment_date, appointment_time, status) VALUES (?, ?, ?, ?, ?, 'Pending')";

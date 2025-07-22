@@ -23,6 +23,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
@@ -103,6 +104,16 @@ public class UserAppointmentController implements Initializable {
         
     }    
 
+    private void showAlert(Alert.AlertType type, String message) {
+        Alert alert = new Alert(type, message);
+        alert.setTitle("DocSetGo");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.getDialogPane().getStylesheets().add(getClass().getResource("Style.css").toExternalForm());
+        alert.getDialogPane().getStyleClass().add("glass-background");
+        alert.showAndWait();
+    }
+    
     private void loadDepartments() {
         try (Connection conn = ConnectionDB.getConnection()) {
             String sql = "SELECT DISTINCT department FROM users WHERE role = 'doctor'";
@@ -196,10 +207,8 @@ public class UserAppointmentController implements Initializable {
                             }
 
                             current = current.plusMinutes(30);
-                            System.out.println("Duty Start: " + start);
-                            System.out.println("Duty End: " + end);
-
                         }
+                            showAlert(Alert.AlertType.INFORMATION,"Duty Start: " + start + "\nDuty End: " + end);
                     }
                 }
             }
@@ -236,7 +245,7 @@ public class UserAppointmentController implements Initializable {
         String minute = minComboBox.getValue();
         String ampm = ampmComboBox.getValue();
         if (department == null || doctor == null || date == null || hour == null || minute == null || ampm == null) {
-            System.out.println("Please fill in all fields.");
+            showAlert(Alert.AlertType.ERROR,"Please fill in all fields.");
             return;
         }
 
@@ -261,7 +270,7 @@ public class UserAppointmentController implements Initializable {
                     LocalTime end = convertTo24Hour(dutySplit[1]);
 
                     if (timeObj.isBefore(start) || timeObj.isAfter(end.minusMinutes(30))) {
-                        System.out.println("Selected time is outside doctor's duty hours.");
+                        showAlert(Alert.AlertType.ERROR,"Selected time is outside doctor's duty hours.");
                         return;
                     }
                 }
@@ -290,9 +299,9 @@ public class UserAppointmentController implements Initializable {
 
                 int rows = ps.executeUpdate();
                 if (rows > 0) {
-                    System.out.println("Appointment booked successfully.");
+                    showAlert(Alert.AlertType.INFORMATION,"Appointment booked successfully.");
                 } else {
-                    System.out.println("Failed to book appointment.");
+                    showAlert(Alert.AlertType.INFORMATION,"Failed to book appointment.");
                 }
             }
         } catch (Exception e) {

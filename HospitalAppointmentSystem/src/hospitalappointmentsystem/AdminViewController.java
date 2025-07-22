@@ -20,7 +20,9 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.stage.Stage;
@@ -67,7 +69,47 @@ public class AdminViewController implements Initializable {
         colStatus.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getStatus()));
 
         loadAllAppointments();
+        
+        colStatus.setCellFactory(column -> new TableCell<AdminAppointment, String>() {
+        @Override
+        protected void updateItem(String status, boolean empty) {
+            super.updateItem(status, empty);
+            if (empty || status == null) {
+                setText(null);
+                setStyle("");
+                getStyleClass().removeAll("status-pending", "status-accepted", "status-rejected", "status-completed");
+            } else {
+                setText(status);
+                getStyleClass().removeAll("status-pending", "status-accepted", "status-rejected", "status-completed");
+
+                switch (status.toLowerCase()) {
+                    case "pending":
+                        getStyleClass().add("status-pending");
+                        break;
+                    case "accepted":
+                        getStyleClass().add("status-accepted");
+                        break;
+                    case "rejected":
+                        getStyleClass().add("status-rejected");
+                        break;
+                    case "completed":
+                        getStyleClass().add("status-completed");
+                        break;
+                }
+            }
+        }
+    });
     }    
+    
+    private void showAlert(Alert.AlertType type, String message) {
+        Alert alert = new Alert(type, message);
+        alert.setTitle("DocSetGo");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.getDialogPane().getStylesheets().add(getClass().getResource("Style.css").toExternalForm());
+        alert.getDialogPane().getStyleClass().add("glass-background");
+        alert.showAndWait();
+    }
 
     private void loadAllAppointments() {
         ObservableList<AdminAppointment> list = FXCollections.observableArrayList();
@@ -89,12 +131,11 @@ public class AdminViewController implements Initializable {
                 ));
             }
         } catch (SQLException e) {
-            System.out.println("Error loading appointment table: " + e.getMessage());
+            showAlert(Alert.AlertType.ERROR, "Error loading appointment table: " + e.getMessage());
         }
 
         // 2. Load from 'guest_appointment' table
-        String sql2 = "SELECT ga.id, ga.patient_name, ga.doctor_name, ga.appointment_date, ga.appointment_time, ga.status " +
-                      "FROM guest_appointment";
+        String sql2 = "SELECT id, patient_name, doctor_name, appointment_date, appointment_time, status FROM guest_appointment";
         try (Connection conn = ConnectionDB.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql2);
              ResultSet rs = ps.executeQuery()) {
@@ -110,7 +151,7 @@ public class AdminViewController implements Initializable {
                 ));
             }
         } catch (SQLException e) {
-            System.out.println("Error loading guest_appointment table: " + e.getMessage());
+            showAlert(Alert.AlertType.ERROR, "Error loading guest_appointment table: " + e.getMessage());
         }
 
         appointmentTable.setItems(list);

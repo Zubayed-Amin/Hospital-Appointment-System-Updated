@@ -19,7 +19,9 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -53,6 +55,7 @@ public class HistoryForPatientController implements Initializable {
 
     public void setUsername(String username) {
         this.loggedInUsername = username;
+        System.out.println("History username set to: " + username);
         loadHistoryAppointments();
     }
 
@@ -67,7 +70,47 @@ public class HistoryForPatientController implements Initializable {
         colDate.setCellValueFactory(new PropertyValueFactory<>("date"));
         colTime.setCellValueFactory(new PropertyValueFactory<>("time"));
         colStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
+        loadHistoryAppointments();
+        colStatus.setCellFactory(column -> new TableCell<PatAppointment, String>() {
+        @Override
+        protected void updateItem(String status, boolean empty) {
+            super.updateItem(status, empty);
+            if (empty || status == null) {
+                setText(null);
+                setStyle("");
+                getStyleClass().removeAll("status-pending", "status-accepted", "status-rejected", "status-completed");
+            } else {
+                setText(status);
+                getStyleClass().removeAll("status-pending", "status-accepted", "status-rejected", "status-completed");
+
+                switch (status.toLowerCase()) {
+                    case "pending":
+                        getStyleClass().add("status-pending");
+                        break;
+                    case "accepted":
+                        getStyleClass().add("status-accepted");
+                        break;
+                    case "rejected":
+                        getStyleClass().add("status-rejected");
+                        break;
+                    case "completed":
+                        getStyleClass().add("status-completed");
+                        break;
+                }
+            }
+        }
+    });
     }    
+    
+    private void showAlert(Alert.AlertType type, String message) {
+        Alert alert = new Alert(type, message);
+        alert.setTitle("DocSetGo");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.getDialogPane().getStylesheets().add(getClass().getResource("Style.css").toExternalForm());
+        alert.getDialogPane().getStyleClass().add("glass-background");
+        alert.showAndWait();
+    }
     
     private void loadHistoryAppointments() {
         if (loggedInUsername == null || loggedInUsername.isEmpty()) {
@@ -134,11 +177,14 @@ public class HistoryForPatientController implements Initializable {
 
     @FXML
     private void goBack(ActionEvent event) throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("UserAppointment.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("ViewAppointment.fxml"));
         Parent root = loader.load();
+        ViewAppointmentController controller = loader.getController();
+        controller.setUsername(loggedInUsername);  // Pass username again ✅
+
         Stage stage = new Stage();
         stage.setScene(new Scene(root));
-        stage.setTitle("User Appointment Dashboard");
+        stage.setTitle("My Appointments");
         stage.show();
         ((Stage) backBtn.getScene().getWindow()).close();
     }

@@ -16,6 +16,7 @@ import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 import javafx.event.ActionEvent;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 
 public class GuestAppointmentController implements Initializable {
@@ -42,10 +43,19 @@ public class GuestAppointmentController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        // Optional: load data here if guestContact is preset
+        
     }
-
-    // Call this method from EditAppointmentController after updating
+    
+    private void showAlert(Alert.AlertType type, String message) {
+        Alert alert = new Alert(type, message);
+        alert.setTitle("DocSetGo");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.getDialogPane().getStylesheets().add(getClass().getResource("Style.css").toExternalForm());
+        alert.getDialogPane().getStyleClass().add("glass-background");
+        alert.showAndWait();
+    }
+    
     public void loadGuestAppointment(String contact) {
         this.guestContact = contact;
 
@@ -72,6 +82,7 @@ public class GuestAppointmentController implements Initializable {
                 Dnum.setText(rs.getString("doctor_contact"));
                 AppDate.setText(rs.getString("appointment_date"));
                 AppTime.setText(rs.getString("appointment_time"));
+                
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -99,6 +110,8 @@ public class GuestAppointmentController implements Initializable {
                 Dnum.setText(rs.getString("doctor_contact"));
                 AppDate.setText(rs.getString("appointment_date"));
                 AppTime.setText(rs.getString("appointment_time"));
+                
+                showAlert(Alert.AlertType.INFORMATION, "Your appointment request has been sent.\nYou will be contacted shortly for confirmation via phone.");
             }
         } catch (SQLException e) {
             e.printStackTrace();

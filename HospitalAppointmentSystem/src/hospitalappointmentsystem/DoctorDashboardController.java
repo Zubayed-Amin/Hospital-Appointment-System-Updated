@@ -42,6 +42,7 @@ public class DoctorDashboardController implements Initializable {
 
     public void setDoctorUsername(String username) {
         this.doctorUsername = username;
+        System.out.println("Username set to: " + username);
         loadAppointments();
     }
 
@@ -52,7 +53,7 @@ public class DoctorDashboardController implements Initializable {
         colDate.setCellValueFactory(new PropertyValueFactory<>("date"));
         colTime.setCellValueFactory(new PropertyValueFactory<>("time"));
         colStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
-
+        loadAppointments();
         colStatus.setCellFactory(column -> new TableCell<DocAppointment, String>() {
             private final ComboBox<String> comboBox = new ComboBox<>(
                     FXCollections.observableArrayList("Pending", "Accepted", "Rejected", "Completed")
@@ -82,6 +83,16 @@ public class DoctorDashboardController implements Initializable {
             }
         });
     
+    }
+    
+    private void showAlert(Alert.AlertType type, String message) {
+        Alert alert = new Alert(type, message);
+        alert.setTitle("DocSetGo");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.getDialogPane().getStylesheets().add(getClass().getResource("Style.css").toExternalForm());
+        alert.getDialogPane().getStyleClass().add("glass-background");
+        alert.showAndWait();
     }
 
     private void loadAppointments() {
